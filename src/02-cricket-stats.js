@@ -38,21 +38,49 @@
  *   // => { name: "Jadeja", strikeRate: 175, economy: 7.5, battingAvg: 28.57, isAllRounder: false }
  */
 export const calcStrikeRate = (runs, balls) => {
-  // Your code here
+  if (runs <= 0 || balls <= 0) return 0;
+  const strikeRate = Number(((runs / balls) * 100).toFixed(2));
+  return strikeRate;
 };
 
 export const calcEconomy = (runsConceded, overs) => {
-  // Your code here
+  if (runsConceded < 0 || overs <= 0) return 0;
+  const economy = Number((runsConceded / overs).toFixed(2));
+  return economy;
 };
 
 export const calcBattingAvg = (totalRuns, innings, notOuts = 0) => {
-  // Your code here
-};
+  const outs = innings - notOuts;
 
+  if (outs <= 0) return 0;
+
+  const avg = totalRuns / outs;
+  return Number(avg.toFixed(2));
+};
 export const isAllRounder = (battingAvg, economy) => {
-  // Your code here
+  if (battingAvg > 30 && economy < 8) {
+    return true;
+  } else {
+    return false;
+  }
 };
 
 export const getPlayerCard = (player) => {
-  // Your code here
+  if (typeof player !== "object" || player === null) return null;
+  const name = player.name;
+  const strikeRate = Number(((player.runs / player.balls) * 100).toFixed(2));
+  const economy = Number((player.runsConceded / player.overs).toFixed(2));
+  const battingAvg = Number(
+    (player.totalRuns / (player.innings - player.notOuts)).toFixed(2),
+  );
+  const isAllRounder = battingAvg > 30 && economy < 8;
+
+  if (isNaN(battingAvg) || isNaN(economy) || isNaN(strikeRate)) return null;
+  return {
+    name,
+    strikeRate,
+    economy,
+    battingAvg,
+    isAllRounder,
+  };
 };

@@ -45,13 +45,71 @@
  *   pricer("gold", true)  // => 200 * 1.5 * 1.3 = 390
  */
 export function createDialogueWriter(genre) {
-  // Your code here
+  const validGenre = new Set(["action", "romance", "comedy", "drama"]);
+  if (!validGenre.has(genre.trim())) return null;
+
+  return function (hero, villain) {
+    if (
+      typeof hero !== "string" ||
+      typeof villain !== "string" ||
+      hero === "" ||
+      villain === ""
+    )
+      return "...";
+
+    if (genre === "action") {
+      return `${hero} says: 'Tujhe toh main dekh lunga, ${villain}!'`;
+    } else if (genre === "romance") {
+      return `${hero} whispers: '${villain}, tum mere liye sab kuch ho'`;
+    } else if (genre === "comedy") {
+      return `${hero} laughs: '${villain} bhai, kya kar rahe ho yaar!'`;
+    } else {
+      return `${hero} cries: '${villain}, tune mera sab kuch cheen liya!'`;
+    }
+  };
 }
 
 export function createTicketPricer(basePrice) {
-  // Your code here
+  if (typeof basePrice !== "number" || basePrice <=0 ) return null;
+  return function (seatMultpliers, isWeekend = false) {
+    if (typeof seatMultpliers !== "string") return null;
+    const validSeatMultiplier = new Set(["gold", "silver", "platinum"]);
+    if (!validSeatMultiplier.has(seatMultpliers.trim())) return null;
+    let price = basePrice;
+    if (seatMultpliers === "gold") {
+      price *= 1.5;
+      if (isWeekend) {
+        price *= 1.3;
+      }
+    } else if (seatMultpliers === "silver") {
+      price *= 1;
+      if (isWeekend) {
+        price *= 1.3;
+      }
+    } else {
+      price *= 2;
+      if (isWeekend) {
+        price *= 1.3;
+      }
+    }
+    const finalPrice = Math.round(price);
+    return finalPrice;
+  };
 }
 
 export function createRatingCalculator(weights) {
-  // Your code here
+  if (typeof weights !== "object" || weights === null) {
+    return null;
+  }
+  return function (scores) {
+    let total = 0;
+
+    for (let key in weights) {
+      if (scores.hasOwnProperty(key)) {
+        total += scores[key] * weights[key];
+      }
+    }
+
+    return Number(total.toFixed(1));
+  };
 }

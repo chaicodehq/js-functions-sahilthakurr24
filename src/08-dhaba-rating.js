@@ -45,17 +45,102 @@
  *   // => [{ rating: 5 }, { rating: 3 }]
  */
 export function createFilter(field, operator, value) {
-  // Your code here
+  if (
+    typeof field !== "string" ||
+    field === "" ||
+    typeof operator !== "string" ||
+    operator === ""
+  )
+    return function () {
+      return false;
+    };
+
+  const validOperator = new Set([">", "<", ">=", "<=", "==="]);
+  if (!validOperator.has(operator))
+    return function () {
+      return false;
+    };
+
+  return function (obj) {
+    if (typeof obj !== "object" || obj === null) return false;
+
+    const val = obj[field];
+
+    if (operator === ">") return val > value;
+    if (operator === "<") return val < value;
+    if (operator === ">=") return val >= value;
+    if (operator === "<=") return val <= value;
+    return val === value;
+  };
 }
 
 export function createSorter(field, order = "asc") {
-  // Your code here
+  if (typeof field !== "string" || field.trim() === "") {
+    throw new TypeError("createSorter: 'field' must be a non-empty string.");
+  }
+
+  if (!["asc", "desc"].includes(order)) {
+    throw new TypeError("createSorter: 'order' must be 'asc' or 'desc'.");
+  }
+
+  const direction = order === "asc" ? 1 : -1;
+
+  return function comparator(a, b) {
+    if (
+      typeof a !== "object" ||
+      typeof b !== "object" ||
+      a === null ||
+      b === null
+    ) {
+      throw new TypeError("createSorter: Can only sort objects.");
+    }
+
+    const valA = a[field];
+    const valB = b[field];
+
+    // Handle undefined values
+    if (valA === undefined && valB === undefined) return 0;
+    if (valA === undefined) return 1;
+    if (valB === undefined) return -1;
+
+    // Number comparison
+    if (typeof valA === "number" && typeof valB === "number") {
+      return (valA - valB) * direction;
+    }
+
+    // String comparison
+    if (typeof valA === "string" && typeof valB === "string") {
+      return valA.localeCompare(valB) * direction;
+    }
+
+    if (valA > valB) return 1 * direction;
+    if (valA < valB) return -1 * direction;
+
+    return 0;
+  };
 }
 
 export function createMapper(fields) {
-  // Your code here
+  if (!Array.isArray(fields)) return {};
+  return function (obj) {
+    if (typeof obj !== "object" || obj === null) return {};
+    const result = {};
+    for (const field of fields) {
+      result[field] = obj[field];
+    }
+    return result;
+  };
 }
 
 export function applyOperations(data, ...operations) {
-  // Your code here
+  if (!Array.isArray(data)) return [];
+  if (operations.length === 0) return [...data];
+  const validOperations = operations.every((op) => {
+    return typeof op === "function";
+  });
+  if (!validOperations) return [];
+
+  return operations.reduce((currResult, fn) => {
+    return fn(currResult);
+  }, data);
 }

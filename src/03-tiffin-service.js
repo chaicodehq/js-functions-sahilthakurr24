@@ -40,13 +40,80 @@
  *   // => { totalCustomers: 3, totalRevenue: 7200, mealBreakdown: { veg: 2, nonveg: 1 } }
  */
 export function createTiffinPlan({ name, mealType = "veg", days = 30 } = {}) {
-  // Your code here
+  const validMeal = new Set(["veg", "nonveg", "jain"]);
+  if (!validMeal.has(mealType)) return null;
+  if (typeof name !== "string" || !name || name === "") return null;
+  let dailyRate;
+  if (mealType === "veg") {
+    dailyRate = 80;
+  } else if (mealType === "nonveg") {
+    dailyRate = 120;
+  } else if (mealType === "jain") {
+    dailyRate = 90;
+  } else {
+    dailyRate = 0;
+  }
+
+  const totalCost = dailyRate * days;
+
+  return {
+    name: name.trim(),
+    mealType,
+    days,
+    dailyRate,
+    totalCost,
+  };
 }
 
 export function combinePlans(...plans) {
-  // Your code here
+  if(plans.length === 0) return null;
+  const totalCustomers = plans.length;
+  const totalRevenue = plans.reduce((sum, plan) => {
+    const totalRate = typeof plan.totalCost === "number" ? plan.totalCost : 0;
+    return sum + totalRate;
+  },0);
+  const vegCount = plans.filter((plan) => {
+    return plan.mealType === "veg";
+  }).length;
+  const nonVegCount = plans.filter((plan) => {
+    return plan.mealType === "nonveg";
+  }).length;
+  const mealBreakdown = {
+    veg: vegCount,
+    nonveg: nonVegCount,
+  };
+
+  return {
+    totalCustomers,
+    totalRevenue,
+    mealBreakdown,
+  };
 }
 
 export function applyAddons(plan, ...addons) {
-  // Your code here
+  if (typeof plan !== "object" || plan === null) return null;
+  if(addons.length === 0) return {
+    name: plan.name,
+    mealType: plan.mealType,
+    days: plan.days,
+    dailyRate: plan.dailyRate,
+    totalCost:  plan.totalCost,
+    addonNames : []
+  }
+
+  let newDailyRate = plan.dailyRate;
+  addons.forEach((addon) => {
+    newDailyRate += typeof addon.price === "number" ? addon.price : 0;
+  });
+
+  const newTotalCost = newDailyRate * plan.days;
+  const addonNames = addons.map((addon) => {
+    return typeof addon.name === "string" ? addon.name : "";
+  });
+  const newPlan = {...plan};
+  newPlan.dailyRate = newDailyRate;
+  newPlan.totalCost = newTotalCost;
+  newPlan.addonNames = addonNames;
+
+  return newPlan;
 }
